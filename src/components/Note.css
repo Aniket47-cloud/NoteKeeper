@@ -2,11 +2,11 @@
 .note {
     margin-left: 15px;
     width: 300px; /* Initial width for larger screens */
-    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-image: linear-gradient(to top, #ff0844 0%, #ffb199 100%);
     backdrop-filter: blur(5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), inset -2px -2px 5px rgba(255, 255, 255, 0.1);
+    box-shadow: inset -6px -4px 2px rgba(255, 255, 255, 0.03);
     border-radius: 15px;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.326);
     padding: 15px;
     min-height: 200px;
     display: flex;
@@ -14,13 +14,13 @@
     justify-content: space-between;
     word-wrap: break-word;
     margin-top: 50px; /* Adjusted margin-top for spacing */
-    
+
     /* Responsive adjustments */
     max-width: 100%; /* Ensures the note doesn't exceed its container */
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 20px; /* Spacing between notes */
-    
+
     /* Optional: Media query for smaller screens */
     @media screen and (max-width: 600px) {
         width: calc(100% - 30px); /* Full width minus margins */
@@ -41,14 +41,14 @@
     white-space: pre-wrap;
     background: transparent;
     border: none;
-    color: white;
+    color: black;
     resize: none;
     height: 80px; /* Fixed height for body */
     font-size: 18px;
-    margin-top: 17px;
+    margin-top:17px;
     margin-bottom: 10px;
     overflow-y: hidden; /* Hide overflow for small screens */
-    
+
     /* Optional: Media query for smaller screens */
     @media screen and (max-width: 600px) {
         height: auto; /* Allow body to expand */
@@ -57,15 +57,15 @@
 
 /* Styles for .save-button */
 .save-button {
-    background: rgba(255, 255, 255, 0.1);
-    transition: 0.2s ease-in-out;
-    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    background: transparent;
+    transition: 0.1s ease-in-out;
+    border: 1.5px solid white;
     border-radius: 10px;
     color: white;
     padding: 4px 10px;
     font-size: 13px;
     cursor: pointer;
-    
+
     /* Optional: Media query for smaller screens */
     @media screen and (max-width: 600px) {
         font-size: 12px; /* Adjusted font size */
@@ -74,13 +74,14 @@
 }
 
 .save-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: white;
     border: 1.5px solid white;
+    color: #4b1589;
 }
 
 /* Additional styling for .text */
 .text {
-    color: white;
+    color: blue;
     height: 80px; /* Fixed height */
 }
 
