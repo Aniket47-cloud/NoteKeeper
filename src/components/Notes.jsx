@@ -6,7 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Note from "./Note";
 import EditNoteModal from "./EditNoteModal";
-
+import { FaBars, FaPlus, FaUserPlus, FaChevronLeft } from "react-icons/fa";
+import { FaSearch } from 'react-icons/fa';
 const NotesList = () => {
   const [page, setPage] = useState(1);
   const [inputTitle, setInputTitle] = useState("");
@@ -20,18 +21,16 @@ const NotesList = () => {
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState("user1");
   const [userNotesCache, setUserNotesCache] = useState({});
-  const [users, setUsers] = useState(["user1"]); // Initial user list with user1
+  const [users, setUsers] = useState(["user1"]);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const itemsPerPage = 6;
 
-  // UUID namespace for converting selectedUser to UUID
   const MY_NAMESPACE = "1b671a64-40d5-491e-99b0-da01ff1f3341";
 
-  // Function to convert selectedUser to UUID
   const convertToUUID = (selectedUser) => {
     return uuidv5(selectedUser, MY_NAMESPACE);
   };
 
-  // Function to fetch notes for a selected user
   const fetchNotes = useCallback(async (user) => {
     setLoading(true);
     try {
@@ -57,7 +56,6 @@ const NotesList = () => {
     }
   }, []);
 
-  // Effect to fetch notes when selectedUser changes
   useEffect(() => {
     if (!userNotesCache[selectedUser]) {
       fetchNotes(selectedUser);
@@ -66,14 +64,12 @@ const NotesList = () => {
     }
   }, [selectedUser, userNotesCache, fetchNotes]);
 
-  // Save note handler
   const saveHandler = async () => {
     setIsModalOpen(false);
     setLoading(true);
   
     try {
       if (edit) {
-        // Update existing note
         const { error } = await supabase
           .from("notes")
           .update({
@@ -100,7 +96,6 @@ const NotesList = () => {
         );
         toast.success("Note updated successfully");
       } else {
-        // Insert new note using RPC
         const { data, error } = await supabase
           .rpc("insert_note", {
             note_title: inputTitle,
@@ -113,11 +108,11 @@ const NotesList = () => {
         if (error) throw error;
   
         if (data && data.length > 0) {
-          const newNote = data[0]; // Take the first (and only) item from the array
+          const newNote = data[0];
           setNotes((prevNotes) => [newNote,...prevNotes]);
           toast.success("Note added successfully");
         } else if (data) {
-          const newNote = data; // Handle single inserted record
+          const newNote = data;
           setNotes((prevNotes) => [newNote,...prevNotes]);
           toast.success("Note added successfully");
         } else {
@@ -138,7 +133,6 @@ const NotesList = () => {
     }
   };
 
-  // Delete note handler
   const deleteHandler = async (id) => {
     const updatedNotes = notes.filter((n) => n.id !== id);
     const subNotes = updatedNotes.slice(
@@ -159,12 +153,11 @@ const NotesList = () => {
       toast.success("Note deleted successfully");
     } catch (error) {
       console.error("Error deleting note: ", error);
-      fetchNotes(selectedUser); // Re-fetch notes after deletion
+      fetchNotes(selectedUser);
       toast.error(`Error deleting note: ${error.message}`);
     }
   };
 
-  // Pin/unpin note handler
   const pinHandler = async (id) => {
     setLoading(true);
     try {
@@ -200,7 +193,6 @@ const NotesList = () => {
     }
   };
 
-  // Edit note handler
   const editHandler = (id, title, tagline, body) => {
     setEdit(id);
     setInputTitle(title);
@@ -210,7 +202,6 @@ const NotesList = () => {
     setIsModalOpen(true);
   };
 
-  // Create note handler
   const createNoteHandler = () => {
     setEdit(null);
     setInputTitle("");
@@ -220,7 +211,6 @@ const NotesList = () => {
     setIsModalOpen(true);
   };
 
-  // Pagination handlers
   const selectPageHandler = () => {
     setPage(page + 1);
   };
@@ -231,7 +221,6 @@ const NotesList = () => {
     }
   };
 
-  // Memoized filtered notes and displayed notes
   const filteredNotes = useMemo(() => {
     return notes
       .filter(
@@ -260,41 +249,25 @@ const NotesList = () => {
     [filteredNotes, page, itemsPerPage]
   );
 
-  // Add user handler
   const addUserHandler = () => {
     const newUser = `user${users.length + 1}`;
     setUsers([...users, newUser]);
     setSelectedUser(newUser);
     setUserNotesCache((prevCache) => ({
       ...prevCache,
-      [newUser]: [], // Initialize cache for the new user
+      [newUser]: [],
     }));
     toast.success(`User ${newUser} added successfully`);
   };
 
   return (
-    <div className="main">
-      <div className="nav">
-        <select
-          value={selectedUser}
-          onChange={(e) => {
-            setSelectedUser(e.target.value);
-            fetchNotes(e.target.value);
-          }}
-          className="user-dropdown"
-        >
-          {users.map((user) => (
-            <option key={user} value={user}>
-              {`User ${user.charAt(user.length - 1)}`}
-            </option>
-          ))}
-        </select>
-        <button className="create" onClick={createNoteHandler}>
-          Add Note
-        </button>
-        <button className="add-user" onClick={addUserHandler}>
-          Add User
-        </button>
+    <div className="app-container">
+    <nav className="navbar">
+      <div className="navbar-left">
+        <FaBars className="menu-icon" onClick={() => setSidebarOpen(!sidebarOpen)} />
+        <h1 className="app-title">Notes App</h1>
+      </div>
+      <div className="navbar-right">
         <input
           type="text"
           placeholder="Search notes..."
@@ -302,54 +275,94 @@ const NotesList = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-bar"
         />
+         <FaSearch className="search-icon" />
       </div>
+    </nav>
 
-      {loading && <p>Loading...</p>}
-
-      <div className="notes">
-        {displayedNotes.map((note) => (
-          <Note
-            key={note.id}
-            id={note.id}
-            tagline={note.tagline}
-            title={note.title}
-            body={note.body}
-            editHandler={editHandler}
-            deleteHandler={deleteHandler}
-            pinHandler={pinHandler}
-            pinned={note.pinned}
-          />
-        ))}
-      </div>
-      <div className="paginate">
-        <button onClick={previousPageHandler} disabled={page <= 1}>
-          ◀️
+    <div className="content-container">
+      <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-header">
+          {sidebarOpen ? (
+            <FaChevronLeft className="collapse-icon" onClick={() => setSidebarOpen(false)} />
+          ) : (
+            <FaBars className="expand-icon" onClick={() => setSidebarOpen(true)} />
+          )}
+        </div>
+        <button className="sidebar-button" onClick={createNoteHandler}>
+          <FaPlus /> {sidebarOpen && "Add Note"}
         </button>
-        {filteredNotes.length > 0 && (
-          <span>
-            Page {page} of {totalPages}
-          </span>
+        <button className="sidebar-button" onClick={addUserHandler}>
+          <FaUserPlus /> {sidebarOpen && "Add User"}
+        </button>
+        {sidebarOpen && (
+          <select
+            value={selectedUser}
+            onChange={(e) => {
+              setSelectedUser(e.target.value);
+              fetchNotes(e.target.value);
+            }}
+            className="user-dropdown"
+          >
+            {users.map((user) => (
+              <option key={user} value={user}>
+                {`User ${user.charAt(user.length - 1)}`}
+              </option>
+            ))}
+          </select>
         )}
-        <button onClick={selectPageHandler} disabled={page >= totalPages}>
-          ▶️
-        </button>
-      </div>
+      </aside>
 
-      <EditNoteModal
-        isOpen={isModalOpen}
-        inputTitle={inputTitle}
-        setInputTitle={setInputTitle}
-        inputTagline={inputTagline}
-        setInputTagline={setInputTagline}
-        inputBody={inputBody}
-        setInputBody={setInputBody}
-        saveHandler={saveHandler}
-        closeModal={() => setIsModalOpen(false)}
-        isEditing={isEditing}
-      />
-      <ToastContainer />
+      <main className="main-content">
+        {loading && <p className="loading-message">Loading...</p>}
+
+        <div className="notes-grid">
+          {displayedNotes.map((note, index) => (
+            <Note
+              key={note.id}
+              id={note.id}
+              tagline={note.tagline}
+              title={note.title}
+              body={note.body}
+              editHandler={editHandler}
+              deleteHandler={deleteHandler}
+              pinHandler={pinHandler}
+              pinned={note.pinned}
+              color={`note-color-${index % 6}`}
+            />
+          ))}
+        </div>
+
+        {filteredNotes.length > 0 && (
+    <div className="pagination">
+      <button onClick={previousPageHandler} disabled={page <= 1}>
+        ◀️
+      </button>
+      <span>
+        Page {page} of {totalPages}
+      </span>
+      <button onClick={selectPageHandler} disabled={page >= totalPages}>
+        ▶️
+      </button>
     </div>
-  );
+  )}
+      </main>
+    </div>
+
+    <EditNoteModal
+      isOpen={isModalOpen}
+      inputTitle={inputTitle}
+      setInputTitle={setInputTitle}
+      inputTagline={inputTagline}
+      setInputTagline={setInputTagline}
+      inputBody={inputBody}
+      setInputBody={setInputBody}
+      saveHandler={saveHandler}
+      closeModal={() => setIsModalOpen(false)}
+      isEditing={isEditing}
+    />
+    <ToastContainer />
+  </div>
+);
 };
 
 export default NotesList;
